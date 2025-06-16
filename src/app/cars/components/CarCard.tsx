@@ -2,7 +2,6 @@
 
 import { Card } from "antd";
 import { Car }  from '@/app/types/car';
-import Image    from 'next/image';
 
 interface Props {
   car: Car;

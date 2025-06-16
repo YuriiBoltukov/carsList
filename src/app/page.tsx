@@ -1,33 +1,40 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Pagination, Spin } from "antd";
-import CarCard              from "./cars/components/CarCard";
-import SortSelect           from "./cars/components/SortSelect";
-import { api }              from '@/app/lib/api';
-import { Car }              from '@/app/types/car';
+import CarCard from "./cars/components/CarCard";
+import SortSelect from "./cars/components/SortSelect";
+import { api } from '@/app/lib/api';
+import { Car } from '@/app/types/car';
 
 const PAGE_SIZE = 12;
 
 export default function CarsPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   const [cars, setCars] = useState<Car[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
-
-  const page = Number(searchParams.get("_page")) || 1;
-  const order = searchParams.get("_order") || "";
+  const [page, setPage] = useState(1);
+  const [order, setOrder] = useState("");
 
   const updateQuery = (params: Record<string, any>) => {
-    const newParams = new URLSearchParams(searchParams.toString());
+    const newParams = new URLSearchParams(window.location.search);
     Object.entries(params).forEach(([key, value]) => {
       if (value) newParams.set(key, String(value));
       else newParams.delete(key);
     });
-    router.push(`/cars?${newParams.toString()}`);
+    router.push(`${pathname}?${newParams.toString()}`);
   };
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const _page = Number(searchParams.get("_page")) || 1;
+    const _order = searchParams.get("_order") || "";
+    setPage(_page);
+    setOrder(_order);
+  }, [typeof window !== "undefined" && window.location.search]);
 
   useEffect(() => {
     setLoading(true);
