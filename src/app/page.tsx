@@ -1,24 +1,26 @@
-"use client";
-import { useEffect, useState }                     from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { Pagination, Spin }                        from "antd";
-import CarCard from "./cars/components/CarCard";
-import SortSelect from "./cars/components/SortSelect";
-import { api } from '@/app/lib/api';
+'use client';
+
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { Pagination, Spin } from 'antd';
+import CarCard from './cars/components/CarCard';
+import SortSelect from './cars/components/SortSelect';
 import { Car } from '@/app/types/car';
+import { useCars } from '@/app/hooks/useCars';
+import { useAppDispatch }                          from '@/app/store/hooks';
+import { resetCars }                               from '@/app/store/slices/carsSlice';
 
 export default function CarsPage() {
+  const dispatch = useAppDispatch();
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [cars, setCars] = useState<Car[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const page = Number(searchParams.get('_page')) || 1;
+  const limit = Number(searchParams.get('_limit')) || 12;
+  const order = searchParams.get('_order') || '';
 
-  const page = Number(searchParams.get("_page")) || 1;
-  const pageSize = Number(searchParams.get("_limit")) || 12;
-  const order = searchParams.get("_order") || "";
+  const { cars, totalCount, loading } = useCars(page, limit, order);
 
   const updateQuery = (params: Record<string, any>) => {
     const newParams = new URLSearchParams(window.location.search);
@@ -29,25 +31,16 @@ export default function CarsPage() {
     router.push(`${pathname}?${newParams.toString()}`);
   };
 
-  useEffect(() => {
-    setLoading(true);
-    const sortQuery = order ? `&_sort=price&_order=${order}` : "";
-    api
-      .get(`/cars?_limit=${pageSize}&_page=${page}${sortQuery}`)
-      .then((res) => {
-        setCars(res.data.data);
-        const meta = res.headers["x-total-count"];
-        setTotalCount(Number(meta));
-      })
-      .finally(() => setLoading(false));
-  }, [page, pageSize, order]);
-
+  const handleSortChange = (value: string) => {
+    dispatch(resetCars());
+    updateQuery({ _order: value, _page: 1 });
+  };
 
   return (
     <div className="p-4 max-w-screen-xl mx-auto">
       <div className="flex justify-between items-center flex-wrap gap-4 mb-6">
         <h1 className="text-2xl font-bold">Автомобили</h1>
-        <SortSelect value={order} onChange={(value) => updateQuery({ _order: value, _page: 1 })} />
+        <SortSelect value={order} onChange={handleSortChange} />
       </div>
 
       {loading ? (
@@ -56,7 +49,7 @@ export default function CarsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {cars.map((car) => (
+          {cars.map((car: Car) => (
             <CarCard key={car.unique_id} car={car} />
           ))}
         </div>
@@ -66,9 +59,9 @@ export default function CarsPage() {
         <Pagination
           current={page}
           total={totalCount}
-          pageSize={pageSize}
+          pageSize={limit}
           showSizeChanger
-          pageSizeOptions={["8", "12", "16", "24", "32"]}
+          pageSizeOptions={['8', '12', '16', '24', '32']}
           onChange={(p, size) => updateQuery({ _page: p, _limit: size })}
         />
       </div>
