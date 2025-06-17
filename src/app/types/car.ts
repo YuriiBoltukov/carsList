@@ -4,7 +4,7 @@ export interface Car {
   folder_id: string;
   mark_id: string;
   images: {
-    [key: string]: string;
+    [key: string]: string[];
   };
   body_type: string;
   modification_id: string;
