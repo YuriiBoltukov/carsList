@@ -1,6 +1,10 @@
 import { LeftOutlined } from '@ant-design/icons';
 
-export function ArrowLeft(props: any) {
+interface Props {
+  onClick?: () => void;
+}
+
+export function ArrowLeft(props: Props) {
   const { onClick } = props;
   return (
     <div

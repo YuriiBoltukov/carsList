@@ -17,7 +17,6 @@ const initialState: CarsState = {
 export const fetchCars = createAsyncThunk(
   'cars/fetchCars',
   async ({ page, limit, order }: { page: number; limit: number; order?: string }) => {
-    console.log('fetch');
     const sortQuery = order ? `&_sort=price&_order=${order}` : '';
     const response = await api.get(`/cars?_page=${page}&_limit=${limit}${sortQuery}`);
     return {

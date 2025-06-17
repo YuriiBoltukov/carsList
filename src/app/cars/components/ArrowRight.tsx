@@ -1,6 +1,10 @@
 import { RightOutlined } from '@ant-design/icons';
 
-export function ArrowRight(props: any) {
+interface Props {
+  onClick?: () => void;
+}
+
+export function ArrowRight(props: Props) {
   const { onClick } = props;
   return (
     <div

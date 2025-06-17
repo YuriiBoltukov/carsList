@@ -6,8 +6,8 @@ import CarCard from './cars/components/CarCard';
 import SortSelect from './cars/components/SortSelect';
 import { Car } from '@/app/types/car';
 import { useCars } from '@/app/hooks/useCars';
-import { useAppDispatch }                          from '@/app/store/hooks';
-import { resetCars }                               from '@/app/store/slices/carsSlice';
+import { useAppDispatch } from '@/app/store/hooks';
+import { resetCars } from '@/app/store/slices/carsSlice';
 
 export default function CarsPage() {
   const dispatch = useAppDispatch();
@@ -22,7 +22,7 @@ export default function CarsPage() {
 
   const { cars, totalCount, loading } = useCars(page, limit, order);
 
-  const updateQuery = (params: Record<string, any>) => {
+  const updateQuery = (params: Record<string, number | string>) => {
     const newParams = new URLSearchParams(window.location.search);
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) newParams.set(key, String(value));

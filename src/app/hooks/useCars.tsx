@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@/app/store/hooks';
-import { fetchCars }                      from '@/app/store/slices/carsSlice';
-import { useEffect, useMemo }                      from 'react';
+import { fetchCars } from '@/app/store/slices/carsSlice';
+import { useEffect, useMemo } from 'react';
 
 export const useCars = (page: number, limit: number, order?: string) => {
   const dispatch = useAppDispatch();
