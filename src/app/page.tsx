@@ -1,53 +1,47 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { Pagination, Spin } from "antd";
+import { useEffect, useState }                     from "react";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { Pagination, Spin }                        from "antd";
 import CarCard from "./cars/components/CarCard";
 import SortSelect from "./cars/components/SortSelect";
 import { api } from '@/app/lib/api';
 import { Car } from '@/app/types/car';
 
-const PAGE_SIZE = 12;
-
 export default function CarsPage() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [cars, setCars] = useState<Car[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [order, setOrder] = useState("");
+
+  const page = Number(searchParams.get("_page")) || 1;
+  const pageSize = Number(searchParams.get("_limit")) || 12;
+  const order = searchParams.get("_order") || "";
 
   const updateQuery = (params: Record<string, any>) => {
     const newParams = new URLSearchParams(window.location.search);
     Object.entries(params).forEach(([key, value]) => {
-      if (value) newParams.set(key, String(value));
+      if (value !== undefined && value !== null) newParams.set(key, String(value));
       else newParams.delete(key);
     });
     router.push(`${pathname}?${newParams.toString()}`);
   };
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const _page = Number(searchParams.get("_page")) || 1;
-    const _order = searchParams.get("_order") || "";
-    setPage(_page);
-    setOrder(_order);
-  }, [typeof window !== "undefined" && window.location.search]);
-
-  useEffect(() => {
     setLoading(true);
     const sortQuery = order ? `&_sort=price&_order=${order}` : "";
     api
-      .get(`/cars?_limit=${PAGE_SIZE}&_page=${page}${sortQuery}`)
+      .get(`/cars?_limit=${pageSize}&_page=${page}${sortQuery}`)
       .then((res) => {
         setCars(res.data.data);
         const meta = res.headers["x-total-count"];
-        setTotalPages(Math.ceil(Number(meta) / PAGE_SIZE));
+        setTotalCount(Number(meta));
       })
       .finally(() => setLoading(false));
-  }, [page, order]);
+  }, [page, pageSize, order]);
+
 
   return (
     <div className="p-4 max-w-screen-xl mx-auto">
@@ -71,9 +65,11 @@ export default function CarsPage() {
       <div className="flex justify-center mt-8">
         <Pagination
           current={page}
-          total={totalPages * PAGE_SIZE}
-          pageSize={PAGE_SIZE}
-          onChange={(p) => updateQuery({ _page: p })}
+          total={totalCount}
+          pageSize={pageSize}
+          showSizeChanger
+          pageSizeOptions={["8", "12", "16", "24", "32"]}
+          onChange={(p, size) => updateQuery({ _page: p, _limit: size })}
         />
       </div>
     </div>

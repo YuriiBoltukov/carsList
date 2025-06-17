@@ -6,6 +6,13 @@ export interface Car {
   images: {
     [key: string]: string;
   };
+  body_type: string;
+  modification_id: string;
+  state: string;
+  run: number;
+  year: number;
+  registry_year: number;
+  vin: string;
 }
 
 export interface Meta {
